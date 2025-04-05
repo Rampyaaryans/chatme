@@ -1,87 +1,45 @@
 import streamlit as st
+import google.generativeai as genai
 from langdetect import detect
 
-# ----------------- Chatbot Brain ------------------
-def get_response(user_input):
-    try:
-        lang = detect(user_input)
-    except:
-        lang = "en"
+# Gemini API Key (replace with your actual key)
+API_KEY = "AIzaSyCsS1F2Sb7RDm-9pnf5FzDfKChG1r4woZc"
+genai.configure(api_key=API_KEY)
 
-    q = user_input.lower()
+# Personal filmy story & facts as context
+context_prompt = """
+You are a friendly, filmy, romantic and funny chatbot who knows everything about Aaryan and Preeti.
+Here's what you know:
 
-    if "meet" in q or "kaise mile" in q or "first time" in q:
-        ans = {
-            "hi": "Hum pehli baar college ke fest mein mile the jab maine ladki ban ke Chikni Chameli pe dance kiya tha. Usne dekh ke impress ho ke mujhse baat ki aur agle din date pe chal diye! ❤️",
-            "en": "We met for the first time at a college fest where I danced on Chikni Chameli dressed as a girl. She was impressed and came to talk, and we went on a date the very next day!",
-        }
-    elif "favourite" in q or "pasand" in q:
-        ans = {
-            "hi": "Use gana gaana, naye kapde pehnna aur tasty khana pasand hai. Strong ladke uski type hain 💪",
-            "en": "She loves singing, wearing new clothes, and delicious food. And yes, she likes strong tall guys 💅",
-        }
-    elif "funny" in q or "mazaak" in q or "prank" in q:
-        ans = {
-            "hi": "Har milne pe hum jokes aur pranks karte hain. Taang kheenchna toh jaise routine hai! 😂",
-            "en": "Every time we meet, it’s full of jokes and pranks. Pulling each other's legs is our love language! 😜",
-        }
-    elif "ex" in q or "kitne" in q:
-        ans = {
-            "hi": "Uske kaafi ex reh chuke hain... aur sabko kaat bhi chuki hai! 🐍",
-            "en": "She had quite a few exes... and well, she’s broken a lot of hearts too! 💔",
-        }
-    elif "weird" in q or "habit" in q or "jeebh" in q:
-        ans = {
-            "hi": "Ham dono ek dusre ko jeebh dikhate hain jab milte hain. Weird but cute hai na? 😛",
-            "en": "We both greet each other by showing our tongues. Weird but kinda cute, right? 😛",
-        }
-    elif "friend zone" in q or "ab kya" in q:
-        ans = {
-            "hi": "Abhi toh friend zone mein hoon... lekin pyaar toh ab bhi pura hai ❤️",
-            "en": "Right now it's a friend-zone phase... but the love is still strong ❤️",
-        }
-    else:
-        ans = {
-            "hi": "Ye baat toh thodi personal hai... lekin tum pooch rahe ho toh chhupayenge kya? 😉",
-            "en": "That’s a bit personal... but since you asked, I won’t hide it from you 😉",
-        }
+- They met during a college fest. Aaryan danced dressed as a girl on 'Chikni Chameli'. Preeti was impressed and started talking to him. They went on a date the very next day, 31st March, to Pal Gaon for go-karting.
+- Preeti loves singing, food, fashion, and strong tall guys. She’s independent and lives life on her terms.
+- Aaryan and Preeti used to talk every night for 2 months. Now they are in the friend-zone.
+- Funny things: Aaryan always cracks jokes when they meet. He loves teasing her.
+- Inside jokes: Preeti sleeps without a bra and has had several exes. She’s broken many hearts.
+- Weird habits: They greet each other by showing their tongues 😜
 
-    return ans.get(lang, ans["en"])
+Always reply in a friendly, playful, flirty and emotional tone. Answer in Hindi, Hinglish, or English based on the question's language. If the user exits, say "Bye bye darling – TAKE CARE ❤️"
+"""
 
+# Load Gemini model
+model = genai.GenerativeModel("gemini-pro")
+chat = model.start_chat(history=[])
 
-# ----------------- Streamlit UI ------------------
-st.set_page_config(page_title="OnePreeti Chatbot", page_icon="💖")
-st.markdown("""
-    <style>
-    .main {
-        background-color: #fff0f5;
-        padding: 2rem;
-        border-radius: 1rem;
-        text-align: center;
-    }
-    .chatbox {
-        border: 2px solid #ff69b4;
-        border-radius: 10px;
-        padding: 10px;
-        background-color: #fff;
-        width: 100%;
-    }
-    </style>
-""", unsafe_allow_html=True)
+st.set_page_config(page_title="Ask About Us 💖", layout="centered")
+st.title("💌 OnePreeti Chatbot")
+st.markdown("<h4 style='text-align: center;'>Ask me anything about You 😉</h4>", unsafe_allow_html=True)
 
-st.markdown("<div class='main'><h2>💬 Ask me anything about You</h2></div>", unsafe_allow_html=True)
-
-user_input = st.text_input("Your Question:", placeholder="Type here in English, Hindi or Hinglish...")
+# Chat loop
+user_input = st.text_input("You:", placeholder="Type your question about Aaryan & Preeti...", key="input")
 
 if user_input:
-    reply = get_response(user_input)
-    st.markdown(f"<div class='chatbox'>{reply}</div>", unsafe_allow_html=True)
+    lang = detect(user_input)
+    prompt = context_prompt + f"\nUser asked in {lang}: {user_input}"
 
-# ----------------- Exit Event ------------------
-st.markdown("""
-    <script>
-    window.addEventListener('beforeunload', function (e) {
-        alert("bye bye darling - TAKE CARE 💔");
-    });
-    </script>
-""", unsafe_allow_html=True)
+    with st.spinner("Thinking..."):
+        response = chat.send_message(prompt)
+        st.markdown(f"<div style='background-color:#f7f7f7;padding:10px;border-radius:10px;margin-top:10px;'>🤖 <b>Bot:</b> {response.text}</div>", unsafe_allow_html=True)
+
+# Exit message
+if st.button("🚪 Exit Chat"):
+    st.markdown("<h3 style='text-align:center;color:#ff4b4b;'>Bye bye darling – TAKE CARE ❤️</h3>", unsafe_allow_html=True)
