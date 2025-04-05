@@ -1,10 +1,10 @@
 import streamlit as st
-import google.generativeai as genai
+import requests
 from langdetect import detect
 
-# Gemini API Key (replace with your actual key)
-API_KEY = "AIzaSyCsS1F2Sb7RDm-9pnf5FzDfKChG1r4woZc"
-genai.configure(api_key=API_KEY)
+# DeepSeek API Setup
+API_KEY = "sk-2f463da5a21d4e4c9f3b6b029f31136e"
+API_URL = "https://api.deepseek.com/v1/chat/completions"
 
 # Personal filmy story & facts as context
 context_prompt = """
@@ -21,10 +21,6 @@ Here's what you know:
 Always reply in a friendly, playful, flirty and emotional tone. Answer in Hindi, Hinglish, or English based on the question's language. If the user exits, say "Bye bye darling – TAKE CARE ❤️"
 """
 
-# Load Gemini model
-model = genai.GenerativeModel("gemini-pro")
-chat = model.start_chat(history=[])
-
 st.set_page_config(page_title="Ask About Us 💖", layout="centered")
 st.title("💌 OnePreeti Chatbot")
 st.markdown("<h4 style='text-align: center;'>Ask me anything about You 😉</h4>", unsafe_allow_html=True)
@@ -34,11 +30,29 @@ user_input = st.text_input("You:", placeholder="Type your question about Aaryan 
 
 if user_input:
     lang = detect(user_input)
-    prompt = context_prompt + f"\nUser asked in {lang}: {user_input}"
+    full_prompt = context_prompt + f"\nUser asked in {lang}: {user_input}"
 
     with st.spinner("Thinking..."):
-        response = chat.send_message(prompt)
-        st.markdown(f"<div style='background-color:#f7f7f7;padding:10px;border-radius:10px;margin-top:10px;'>🤖 <b>Bot:</b> {response.text}</div>", unsafe_allow_html=True)
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {API_KEY}"
+        }
+
+        data = {
+            "model": "deepseek-chat",
+            "messages": [
+                {"role": "system", "content": context_prompt},
+                {"role": "user", "content": user_input}
+            ]
+        }
+
+        response = requests.post(API_URL, headers=headers, json=data)
+
+        if response.status_code == 200:
+            output = response.json()['choices'][0]['message']['content']
+            st.markdown(f"<div style='background-color:#f7f7f7;padding:10px;border-radius:10px;margin-top:10px;'>🤖 <b>Bot:</b> {output}</div>", unsafe_allow_html=True)
+        else:
+            st.error("Something went wrong. Please try again later.")
 
 # Exit message
 if st.button("🚪 Exit Chat"):
