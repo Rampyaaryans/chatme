@@ -21,8 +21,15 @@ Here's what you know:
 Always reply in a friendly, playful, flirty and emotional tone. Answer in Hindi, Hinglish, or English based on the question's language. If the user exits, say "Bye bye darling – TAKE CARE ❤️"
 """
 
+<<<<<<< HEAD
+=======
+# Load Gemini model
+model = genai.GenerativeModel(model_name="gemini-pro")
+chat = model.start_chat(history=[])
+
+>>>>>>> 4e9ad19d613a10962cd3b722413a7709d7f125da
 st.set_page_config(page_title="Ask About Us 💖", layout="centered")
-st.title("💌 OnePreeti Chatbot")
+st.title("Chatbot")
 st.markdown("<h4 style='text-align: center;'>Ask me anything about You 😉</h4>", unsafe_allow_html=True)
 
 # Chat loop
