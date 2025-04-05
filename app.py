@@ -22,7 +22,7 @@ Always reply in a friendly, playful, flirty and emotional tone. Answer in Hindi,
 """
 
 # Load Gemini model
-model = genai.GenerativeModel("gemini-pro")
+model = genai.GenerativeModel(model_name="models/gemini-pro")
 chat = model.start_chat(history=[])
 
 st.set_page_config(page_title="Ask About Us 💖", layout="centered")
