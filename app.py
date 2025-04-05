@@ -26,7 +26,7 @@ model = genai.GenerativeModel(model_name="models/gemini-pro")
 chat = model.start_chat(history=[])
 
 st.set_page_config(page_title="Ask About Us 💖", layout="centered")
-st.title("💌 OnePreeti Chatbot")
+st.title("Chatbot")
 st.markdown("<h4 style='text-align: center;'>Ask me anything about You 😉</h4>", unsafe_allow_html=True)
 
 # Chat loop
